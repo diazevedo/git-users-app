@@ -40,7 +40,7 @@ class Main extends Component {
 
     this.setState({
       users: [...users, data],
-      newUser: '',
+      newUser: 'Diego',
       loading: false,
     });
 
