@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { Text } from 'react-native';
+import PropTypes from 'prop-types';
+
 import api from '../../services/api';
 import {
   Container,
@@ -14,6 +15,7 @@ import {
   Info,
   Title,
   Author,
+  ActivityIndicator,
 } from './styles';
 
 class User extends Component {
@@ -23,19 +25,21 @@ class User extends Component {
 
   state = {
     stars: [],
+    loading: false,
   };
 
   async componentDidMount() {
     const { navigation } = this.props;
     const { login } = navigation.getParam('user');
+    this.setState({ loading: true });
 
     const response = await api.get(`/users/${login}/starred`);
-    this.setState({ stars: response.data });
+    this.setState({ stars: response.data, loading: false });
   }
 
   render() {
     const { navigation } = this.props;
-    const { stars } = this.state;
+    const { stars, loading } = this.state;
     const user = navigation.getParam('user');
     return (
       <Container>
@@ -44,23 +48,28 @@ class User extends Component {
           <Name>{user.name}</Name>
           <Bio>{user.bio}</Bio>
         </Header>
-        <Stars
-          data={stars}
-          keyExtractor={start => String(start.id)}
-          renderItem={({ item }) => (
-            <Starred>
-              <OnwerAvatar source={{ uri: item.owner.avatar_url }} />
-              <Info>
-                <Title>{item.name}</Title>
-                <Author>{item.owner.login}</Author>
-              </Info>
-            </Starred>
-          )}
-        />
+        {loading ? (
+          <ActivityIndicator />
+        ) : (
+          <Stars
+            data={stars}
+            keyExtractor={start => String(start.id)}
+            renderItem={({ item }) => (
+              <Starred>
+                <OnwerAvatar source={{ uri: item.owner.avatar_url }} />
+                <Info>
+                  <Title>{item.name}</Title>
+                  <Author>{item.owner.login}</Author>
+                </Info>
+              </Starred>
+            )}
+          />
+        )}
       </Container>
     );
   }
 }
+
 User.propTypes = {
   navigation: PropTypes.shape({
     getParam: PropTypes.func,

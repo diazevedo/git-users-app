@@ -73,3 +73,11 @@ export const Author = styled.Text`
   color: #666;
   margin-top: 2px;
 `;
+
+export const ActivityIndicator = styled.ActivityIndicator.attrs({
+  size: 'large',
+})`
+  color: black;
+  background-color: #f5f5f5;
+  height: 500px;
+`;
