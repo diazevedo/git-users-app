@@ -6,6 +6,6 @@ if (__DEV__) {
   const tron = Reactotron.configure()
     .useReactNative()
     .connect();
-  console.tron = tron;
+  console.tron = tron.log;
   tron.clear();
 }

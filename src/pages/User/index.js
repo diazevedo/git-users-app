@@ -26,11 +26,15 @@ class User extends Component {
     stars: [],
     loading: false,
     page: 1,
+    refreshing: false,
   };
 
   async componentDidMount() {
     this.setState({ loading: true });
-    await this.loadStarred();
+
+    const { page } = this.state;
+
+    await this.loadStarred(page);
 
     this.setState({ loading: false });
   }
@@ -42,7 +46,7 @@ class User extends Component {
 
     const response = await api.get(`/users/${login}/starred`, {
       params: {
-        per_page: 8,
+        per_page: 15,
         page,
       },
     });
@@ -51,13 +55,24 @@ class User extends Component {
       stars: [].concat(stars, response.data),
       loading: false,
       page: page + 1,
+      refreshing: false,
     });
+  };
+
+  handleNavigate = repository => {
+    const { navigation } = this.props;
+    navigation.navigate('Repository', { repository });
+  };
+
+  refreshList = () => {
+    this.setState({ refreshing: true, stars: [], page: 1 }, this.loadStarred);
   };
 
   render() {
     const { navigation } = this.props;
-    const { stars, loading } = this.state;
+    const { stars, loading, refreshing } = this.state;
     const user = navigation.getParam('user');
+
     return (
       <Container>
         <Header>
@@ -73,8 +88,10 @@ class User extends Component {
             keyExtractor={start => String(start.id)}
             onEndReachedThreshold={0.1}
             onEndReached={this.loadStarred}
+            onRefresh={this.refreshList}
+            refreshing={refreshing}
             renderItem={({ item }) => (
-              <Starred>
+              <Starred onPress={() => this.handleNavigate(item)}>
                 <OnwerAvatar source={{ uri: item.owner.avatar_url }} />
                 <Info>
                   <Title>{item.name}</Title>
@@ -92,11 +109,8 @@ class User extends Component {
 User.propTypes = {
   navigation: PropTypes.shape({
     getParam: PropTypes.func,
+    navigate: PropTypes.func,
   }).isRequired,
 };
 
 export default User;
-// const mapStateToProps = state => ({});
-
-// const mapDispatchToProps = dispatch =>
-//   bindActionCreators(Actions, dispatch);
